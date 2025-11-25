@@ -8,7 +8,6 @@
 
 # Environment / secrets
 .env
-.env.*
 *.key
 *.pem
 firebase-service-account.json
