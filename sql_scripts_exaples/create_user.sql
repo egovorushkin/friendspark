@@ -1,0 +1,18 @@
+INSERT INTO users (id,
+                   email,
+                   password_hash,
+                   name,
+                   age_range,
+                   geohash,
+                   is_verified,
+                   photo_url,
+                   created_at)
+VALUES ('b1a7e8c2-1234-4f56-9abc-1234567890ab',
+        'user@example.com',
+        'hashed_password_here',
+        'John Doe',
+        '18-24',
+        'u4pruydqqvj8',
+        TRUE,
+        'https://example.com/photo.jpg',
+        NOW());

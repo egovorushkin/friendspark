@@ -1,0 +1,77 @@
+# --- Global ---
+.DS_Store
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Environment / secrets
+.env
+.env.*
+*.key
+*.pem
+firebase-service-account.json
+
+# --- Git ---
+.git/
+.gitignore~
+
+# --- IDE / Editor ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.kate-swp
+
+# --- OS-specific ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Gradle / Kotlin / Java ---
+.gradle/
+**/build/
+**/out/
+
+# Local Gradle configuration
+local.properties
+friendspark-backend/local.properties
+friendspark-kmp/local.properties
+
+# Kotlin/Java compile artifacts
+*.class
+*.jar
+*.war
+*.ear
+*.kotlin_module
+
+# --- Kotlin Multiplatform / Compose ---
+# Node / JS packages used by KMP JS targets
+**/node_modules/
+**/npm-debug.log*
+**/yarn-error.log*
+**/pnpm-lock.yaml
+**/package-lock.json
+
+# KMP JS build outputs (under friendspark-kmp/build/js)
+**/friendspark-kmp/build/js/packages/
+**/friendspark-kmp/build/js/packages_imported/
+
+# Kotlin/Native / iOS
+**/kotlin-js-store/
+**/*.klib
+**/build/xcode-frameworks/
+**/*.xcworkspace/
+**/xcuserdata/
+DerivedData/
+
+# --- Docker / DB ---
+# Ignore volumes or transient DB files if created locally
+*.db
+*.sqlite
+
+# --- Misc ---
+# Ignore any local SQL experiments
+sql_scripts_exaples/**/*.log
