@@ -10,4 +10,5 @@ interface UserRepository : JpaRepository<User, UUID> {
     fun findByEmail(email: String): User?
     fun existsByEmail(email: String): Boolean
     fun findByFirebaseUid(firebaseUid: String): User?
+    fun findAllByGeohashStartingWith(geohashPrefix: String): List<User>
 }

@@ -32,7 +32,7 @@ class EventController(
 
     @PostMapping
     fun createEvent(@Valid @RequestBody req: CreateEventRequest): ResponseEntity<EventResponse> {
-        val creator = userService.getUserById(req.creatorId)
+        val creator: com.friendspark.backend.entity.User = userService.getUserEntityById(req.creatorId)
             ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
         val eventDate = try {
             Instant.parse(req.eventDate)
@@ -53,7 +53,7 @@ class EventController(
     }
 
     @DeleteMapping("/{id}")
-    fun deleteEvent(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun deleteEvent(@PathVariable id: UUID): ResponseEntity<Unit> {
         eventService.deleteEvent(id)
         return ResponseEntity.noContent().build()
     }
@@ -67,8 +67,8 @@ class EventController(
         return try {
             val updated = eventService.updateEvent(existing, patch)
             ResponseEntity.ok(EventResponse.fromEntity(updated))
-        } catch (e: OptimisticLockingFailureException) {
-            ResponseEntity.status(HttpStatus.CONFLICT).build()
+        } catch (_: OptimisticLockingFailureException) {
+            ResponseEntity.status(HttpStatus.CONFLICT).build<EventResponse>()
         }
     }
 }
