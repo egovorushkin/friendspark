@@ -2,12 +2,12 @@ package com.friendspark.backend.dto.event
 
 import com.friendspark.backend.entity.Event
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 /**
  * DTO sent back to clients; hides lazy JPA relationships and formats data cleanly.
  */
- data class EventResponse(
+data class EventResponse(
     val id: UUID?,
     val title: String,
     val locationGeohash: String,
@@ -15,10 +15,10 @@ import java.util.UUID
     val eventDate: Instant,
     val maxAttendees: Int?,
     val isPublic: Boolean,
-    val creatorId: UUID,
+    val creatorId: UUID?,
     val createdAt: Instant,
     val updatedAt: Instant
- ) {
+) {
     companion object {
         fun fromEntity(e: Event): EventResponse = EventResponse(
             id = e.id,
@@ -33,4 +33,4 @@ import java.util.UUID
             updatedAt = e.updatedAt
         )
     }
- }
+}

@@ -25,14 +25,14 @@ class SecurityConfig(
 
     /**
      * 5. Minimal UserDetailsService Bean
-     * * This bean is provided explicitly to satisfy Spring Security's auto-configuration,
+     * * This bean is provided explicitly to satisfy Spring Security's autoconfiguration,
      * which otherwise generates an InMemoryUserDetailsManager and the "Using generated
      * security password" warning. Since Firebase handles authentication, this bean
      * is not used for actual token validation.
      */
     @Bean
     fun userDetailsService(): UserDetailsService {
-        return UserDetailsService { username ->
+        return UserDetailsService { _ ->
             // Throw an exception to ensure no one accidentally relies on this for login.
             throw UsernameNotFoundException("Authentication handled by Firebase ID Token.")
         }

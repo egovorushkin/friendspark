@@ -1,66 +1,58 @@
 package com.friendspark.backend.entity
 
-import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
-import java.time.Instant
-import java.util.UUID
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 @Entity
-@Table(
-    name = "users",
-    indexes = [
-        Index(name = "idx_users_geohash", columnList = "geohash"),
-        Index(name = "idx_users_email", columnList = "email", unique = true)
-    ]
-)
-data class User(
+@Table(name = "users", indexes = [
+    Index(columnList = "geohash"),           // fast nearby queries
+    Index(columnList = "firebase_uid", unique = true)
+])
+class User(
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid")
-    val id: UUID = UUID.randomUUID(),
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: UUID? = null,
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(name = "firebase_uid", nullable = false, unique = true)
+    val firebaseUid: String,
+
+    @Column(nullable = false)
     val email: String,
 
     @Column(nullable = false)
-    var passwordHash: String?,
-
-    @Column(nullable = false, length = 100)
     var name: String,
 
-    @Column(length = 20)
-    var ageRange: String? = null, // e.g., "18-24"
-
-    @ElementCollection
-    @CollectionTable(name = "user_interests", joinColumns = [JoinColumn(name = "user_id")])
-    @Column(name = "interest")
-    var interests: MutableSet<String> = mutableSetOf(),
-
-    @Column(nullable = false, length = 12)
-    var geohash: String = "", // 9–12 chars = ~10m to ~1m precision
-
-    @Column(name = "photo_url")
     var photoUrl: String? = null,
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
+    @ElementCollection
+    var interests: List<String> = emptyList(),
 
-    @Column(name = "updated_at")
-    var updatedAt: Instant = Instant.now(),
+    @Column(length = 12, nullable = false)
+    var geohash: String = "",
 
-    @Column(name = "is_verified", nullable = false)
-    var isVerified: Boolean = false
-) {
-    @PreUpdate
-    fun onUpdate() {
-        updatedAt = Instant.now()
-    }
-}
+    var latitude: Double = 0.0,
+    var longitude: Double = 0.0,
+
+    var birthDate: LocalDate? = null,
+
+    @Enumerated(EnumType.STRING)
+    var gender: Gender? = null,
+
+    @Column(nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    var lastActiveAt: LocalDateTime = LocalDateTime.now(),
+
+    var isOnboarded: Boolean = false
+)

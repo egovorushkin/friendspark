@@ -19,6 +19,8 @@ spring:
       mode: always
 server:
   port: 8090
+  servlet:
+    context-path: /api/v1
 
 logging:
   level:
@@ -29,4 +31,5 @@ logging:
           descriptor:
             sql: TRACE
       springframework:
-        security: INFO
+        security: TRACE
+        web: TRACE

@@ -12,10 +12,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/events")
 class EventController(
     private val eventService: EventService,
     private val userService: UserService

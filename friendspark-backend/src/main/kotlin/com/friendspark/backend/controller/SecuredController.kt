@@ -1,6 +1,5 @@
 package com.friendspark.backend.controller
 
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -8,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class SecuredController {
 
-    @GetMapping("/api/secured/data")
+    @GetMapping("/secured/data")
     fun getSecuredData(): String {
         // The principal is the Firebase UID (string) set by the FirebaseTokenFilter
         val firebaseUid = (SecurityContextHolder.getContext().authentication?.principal ?: getSecuredData()) as String
