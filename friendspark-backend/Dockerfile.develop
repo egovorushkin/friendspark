@@ -1,0 +1,15 @@
+# Development Dockerfile for friendspark-backend
+# Intended for use with docker-compose, mounting the project source into /workspace.
+
+FROM gradle:8.10.2-jdk21 AS dev
+
+# Set working directory inside the container
+WORKDIR /workspace
+
+# Copy Gradle wrapper and configuration for dependency resolution & caching
+COPY build.gradle.kts settings.gradle.kts gradlew gradlew.bat /workspace/
+COPY gradle /workspace/gradle
+
+# Default command: run the Spring Boot app in dev mode using bootRun.
+# The source code (src, resources, etc.) should be mounted into /workspace via docker-compose volumes.
+CMD ["./gradlew", "bootRun", "--no-daemon"]
