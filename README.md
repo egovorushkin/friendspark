@@ -578,6 +578,23 @@ classDiagram
  
 ```
 
+## Registration
+```mermaid
+sequenceDiagram
+    participant Mobile as KMP App
+    participant Firebase as Firebase Auth
+    participant Backend as FriendSpark API
+    participant DB as PostgreSQL
+
+    Mobile->>Firebase: createUserWithEmailAndPassword(email, password)
+    Firebase-->>Mobile: FirebaseUser + ID Token
+    Mobile->>Backend: POST /api/auth/register (Bearer <idToken>)
+    Backend->>Firebase: verifyIdToken(token) → gets firebaseUid
+    Backend->>DB: INSERT INTO users (firebase_uid, email, name, interests, geohash, ...)
+    Backend-->>Mobile: { success: true, userId: UUID }
+```
+
+
 ## Authentication/Authorization Flow
 
 ```mermaid
