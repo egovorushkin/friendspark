@@ -88,20 +88,23 @@ Different pictures where two and more persons (m/w, m/m, w/w, etc) are doing wha
 # MVP Implementation Priority
 
 **Phase 1 (Weeks 1-4):**
-•	User registration/authentication
-•	Basic profile creation
-•	Simple proximity search
-•	Basic mobile app with core screens
+- User registration/authentication
+- Basic profile creation
+- Simple proximity search
+- Basic mobile app with core screens
+
 **Phase 2 (Weeks 5-8):**
-•	Interest-based filtering
-•	Event creation and search
-•	Enhanced profile features
-•	Web application
+- Interest-based filtering
+- Event creation and search
+- Enhanced profile features
+- Web application
+
+
 **Phase 3 (Weeks 9-12):**
-•	Advanced matching algorithms
-•	Push notifications
-•	Performance optimizations
-•	Analytics integration
+- Advanced matching algorithms
+- Push notifications
+- Performance optimizations
+- Analytics integration
 
 ## User flow diagram
 
