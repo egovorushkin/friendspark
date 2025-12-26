@@ -1,6 +1,7 @@
 package com.friendspark.backend.controller
 
-import com.friendspark.backend.dto.UserDetailsDTO
+import com.friendspark.backend.dto.user.UserDetailsDTO
+import com.friendspark.backend.dto.user.UserUpdateDTO
 import com.friendspark.backend.entity.User
 import com.friendspark.backend.service.UserService
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -18,8 +19,7 @@ class UserController(private val userService: UserService) {
     fun me(@AuthenticationPrincipal user: User): Map<String, Any?> {
         return mapOf(
             "id" to user.id,
-            "email" to user.email,
-            "name" to user.name
+            "email" to user.email
         )
     }
 
@@ -29,4 +29,10 @@ class UserController(private val userService: UserService) {
     @GetMapping("/nearby")
     fun findNearbyUsers(@RequestParam geohashPrefix: String): List<UserDetailsDTO> =
         userService.findNearbyUsers(geohashPrefix)
+
+    @PutMapping("/me")
+    fun updateProfile(
+        @AuthenticationPrincipal uid: String,
+        @RequestBody updateDTO: UserUpdateDTO
+    ): UserDetailsDTO = userService.updateUserProfile(uid, updateDTO)
 }
