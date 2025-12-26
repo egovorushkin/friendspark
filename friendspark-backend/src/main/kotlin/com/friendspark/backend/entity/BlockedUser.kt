@@ -1,14 +1,19 @@
 package com.friendspark.backend.entity
 
-import jakarta.persistence.*
-import jakarta.validation.constraints.NotNull
-import org.hibernate.annotations.ColumnDefault
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.IdClass
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import java.time.Instant
+import java.util.UUID
 
 @Entity
 @Table(name = "blocked_users")
-@IdClass(BlockId::class)
-class BlockedUser(
+@IdClass(BlockedUserId::class)
+data class BlockedUser(
     @Id
     @ManyToOne
     @JoinColumn(name = "blocker_id")
@@ -19,10 +24,13 @@ class BlockedUser(
     @JoinColumn(name = "blocked_id")
     val blocked: User,
 
-    var reason: String? = null,
+    @Column(name = "blocked_at", nullable = false)
+    val blockedAt: Instant = Instant.now(),
 
-    @NotNull
-    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
-    @Column(name = "created_at", nullable = false)
-    var createdAt: Instant
+    var reason: String? = null
 )
+
+data class BlockedUserId(
+    val blocker: UUID = UUID.randomUUID(),
+    val blocked: UUID = UUID.randomUUID()
+) : java.io.Serializable
