@@ -1,0 +1,7 @@
+[versions]
+flywayVersion = "11.18.0"
+firebaseAdminVersion = "9.7.0"
+
+[libraries]
+flyway = { module = "org.flywaydb:flyway-core", version.ref = "flywayVersion" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdminVersion" }
