@@ -72,4 +72,7 @@ DerivedData/
 *.sqlite
 
 # --- Misc ---
-AGENTS.MD
+/AGENTS.MD
+/AGENTS.md
+**/AGENTS.MD
+**/AGENTS.md
