@@ -109,66 +109,63 @@ Different pictures where two and more persons (m/w, m/m, w/w, etc) are doing wha
 ## User flow diagram
 
 ```mermaid
-flowchart TD
-    Start([App Launch]) --> Splash[Splash Screen]
-    Splash --> CheckAuth{User Logged In?}
-    
-    CheckAuth -->|No| Onboard[Onboarding Screen]
-    CheckAuth -->|Yes| Home[Home Screen]
-    
-    Onboard --> GetStarted(Click 'Get Started')
-    GetStarted --> SignUp[Sign Up Screen]
-    
-    SignUp --> FillForm(Fill Registration Form)
-    FillForm --> Submit(Click 'Submit')
-    Submit --> Validate{Form Valid?}
-    
-    Validate -->|No| Error1[Show Error Message]
-    Error1 --> SignUp
-    
-    Validate -->|Yes| Register{Registration Success?}
-    Register -->|No| Error2[Show Error]
-    Error2 --> SignUp
-    
-    Register -->|Yes| Welcome[Welcome Screen]
-    Welcome --> Home
-    
-    Home --> Search(Click 'Search')
-    Home --> Profile(Click 'Profile')
-    Home --> Messages(Click 'Messages')
-    
-    Search --> SearchScreen[Search Screen]
-    Profile --> ProfileScreen[Profile/Friend Details]
-    Messages --> MessagesScreen[Messages Screen]
-    
-    ProfileScreen --> SendMsg(Click 'Send Message')
-    ProfileScreen --> ViewEvents(Click 'View Events')
-    
-    SendMsg --> MessagesScreen
-    ViewEvents --> EventsScreen[Events Screen]
-    
-    style Start fill:#13a4ec,stroke:#0c7bb3,color:#fff
-    style Splash fill:#10b981,stroke:#059669,color:#fff
-    style Home fill:#10b981,stroke:#059669,color:#fff
-    style Onboard fill:#10b981,stroke:#059669,color:#fff
-    style SignUp fill:#10b981,stroke:#059669,color:#fff
-    style Welcome fill:#10b981,stroke:#059669,color:#fff
-    style SearchScreen fill:#10b981,stroke:#059669,color:#fff
-    style ProfileScreen fill:#10b981,stroke:#059669,color:#fff
-    style MessagesScreen fill:#10b981,stroke:#059669,color:#fff
-    style EventsScreen fill:#10b981,stroke:#059669,color:#fff
-    style Error1 fill:#ef4444,stroke:#dc2626,color:#fff
-    style Error2 fill:#ef4444,stroke:#dc2626,color:#fff
-    style GetStarted fill:#f9f,stroke:#dc2626,color:#fff
-    style Submit fill:#f9f,stroke:#dc2626,color:#fff
-    style Search fill:#f9f,stroke:#dc2626,color:#fff
-    style Profile fill:#f9f,stroke:#dc2626,color:#fff
-    style Messages fill:#f9f,stroke:#dc2626,color:#fff
-    style SendMsg fill:#f9f,stroke:#dc2626,color:#fff
-    style ViewEvents fill:#f9f,stroke:#dc2626,color:#fff
-    
-    
-   
+    flowchart TD
+        Start([App Launch]) --> Splash[Splash Screen]
+        Splash --> CheckAuth{User Logged In?}
+        
+        CheckAuth -->|No| Onboard[Onboarding Screen]
+        CheckAuth -->|Yes| Home[Home Screen]
+        
+        Onboard --> GetStarted(Click 'Get Started')
+        GetStarted --> SignUp[Sign Up Screen]
+        
+        SignUp --> FillForm(Fill Registration Form)
+        FillForm --> Submit(Click 'Submit')
+        Submit --> Validate{Form Valid?}
+        
+        Validate -->|No| Error1[Show Error Message]
+        Error1 --> SignUp
+        
+        Validate -->|Yes| Register{Registration Success?}
+        Register -->|No| Error2[Show Error]
+        Error2 --> SignUp
+        
+        Register -->|Yes| Welcome[Welcome Screen]
+        Welcome --> Home
+        
+        Home --> Search(Click 'Search')
+        Home --> Profile(Click 'Profile')
+        Home --> Messages(Click 'Messages')
+        
+        Search --> SearchScreen[Search Screen]
+        Profile --> ProfileScreen[Profile/Friend Details]
+        Messages --> MessagesScreen[Messages Screen]
+        
+        ProfileScreen --> SendMsg(Click 'Send Message')
+        ProfileScreen --> ViewEvents(Click 'View Events')
+        
+        SendMsg --> MessagesScreen
+        ViewEvents --> EventsScreen[Events Screen]
+        
+        style Start fill:#13a4ec,stroke:#0c7bb3,color:#fff
+        style Splash fill:#10b981,stroke:#059669,color:#fff
+        style Home fill:#10b981,stroke:#059669,color:#fff
+        style Onboard fill:#10b981,stroke:#059669,color:#fff
+        style SignUp fill:#10b981,stroke:#059669,color:#fff
+        style Welcome fill:#10b981,stroke:#059669,color:#fff
+        style SearchScreen fill:#10b981,stroke:#059669,color:#fff
+        style ProfileScreen fill:#10b981,stroke:#059669,color:#fff
+        style MessagesScreen fill:#10b981,stroke:#059669,color:#fff
+        style EventsScreen fill:#10b981,stroke:#059669,color:#fff
+        style Error1 fill:#ef4444,stroke:#dc2626,color:#fff
+        style Error2 fill:#ef4444,stroke:#dc2626,color:#fff
+        style GetStarted fill:#f9f,stroke:#dc2626,color:#fff
+        style Submit fill:#f9f,stroke:#dc2626,color:#fff
+        style Search fill:#f9f,stroke:#dc2626,color:#fff
+        style Profile fill:#f9f,stroke:#dc2626,color:#fff
+        style Messages fill:#f9f,stroke:#dc2626,color:#fff
+        style SendMsg fill:#f9f,stroke:#dc2626,color:#fff
+        style ViewEvents fill:#f9f,stroke:#dc2626,color:#fff   
 ```
 
 ## Component Communication Diagram
