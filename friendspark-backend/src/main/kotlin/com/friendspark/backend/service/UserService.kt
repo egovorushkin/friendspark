@@ -1,8 +1,8 @@
 package com.friendspark.backend.service
 
 import com.friendspark.backend.dto.RegisterRequestDTO
-import com.friendspark.backend.dto.user.UserCreateDto
 import com.friendspark.backend.dto.user.UserDetailsDTO
+import com.friendspark.backend.dto.user.UserCreateDto
 import com.friendspark.backend.dto.user.UserUpdateDTO
 import com.friendspark.backend.entity.User
 import com.friendspark.backend.mapper.UserMapper
@@ -15,7 +15,8 @@ import java.util.*
 @Service
 class UserService(
     private val userMapper: UserMapper,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val firebaseService: FirebaseService,
 ) {
     fun getAllUsers(): List<UserDetailsDTO> = userRepository.findAll().map { it.toDetailsDTO() }
     fun getUserById(id: UUID): UserDetailsDTO? = userRepository.findById(id).orElse(null)?.toDetailsDTO()
@@ -51,7 +52,11 @@ class UserService(
         )
         val newUser = userMapper.to(userCreate)
 
-        return userRepository.save(newUser)
+        val savedUser = userRepository.save(newUser)
+
+        // TODO: handle exceptions
+        firebaseService.addCustomClaims(savedUser.firebaseUid, mapOf("role" to savedUser.role.name))
+        return savedUser
     }
 
     fun deleteUser(id: UUID) = userRepository.deleteById(id)
@@ -76,9 +81,8 @@ class UserService(
 private fun User.toDetailsDTO() = UserDetailsDTO(
     id = this.id,
     email = this.email,
-    firstName = this.firstName,
-    lastName = this.lastName,
+    name = listOfNotNull(this.firstName, this.lastName).filter { it.isNotBlank() }.joinToString(" ").ifBlank { this.firstName },
     photoUrl = this.photoUrl,
-    interests = this.interests,
+    interests = this.interests?.map { it.toString() } ?: emptyList(),
     birthDate = this.birthDate,
 )
