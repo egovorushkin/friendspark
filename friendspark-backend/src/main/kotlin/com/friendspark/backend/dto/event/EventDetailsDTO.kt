@@ -7,10 +7,12 @@ import java.util.*
 /**
  * DTO sent back to clients; hides lazy JPA relationships and formats data cleanly.
  */
-data class EventResponse(
+data class EventDetailsDTO(
     val id: UUID?,
     val title: String,
-    val locationGeohash: String,
+    val geohash: String,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
     val description: String?,
     val eventDate: Instant,
     val maxAttendees: Int?,
@@ -20,10 +22,12 @@ data class EventResponse(
     val updatedAt: Instant
 ) {
     companion object {
-        fun fromEntity(e: Event): EventResponse = EventResponse(
+        fun fromEntity(e: Event): EventDetailsDTO = EventDetailsDTO(
             id = e.id,
             title = e.title,
-            locationGeohash = e.locationGeohash,
+            geohash = e.geohash,
+            latitude = e.latitude,
+            longitude = e.longitude,
             description = e.description,
             eventDate = e.eventDate,
             maxAttendees = e.maxAttendees,

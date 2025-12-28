@@ -1,5 +1,8 @@
 package com.friendspark.backend.entity
 
+/**
+ * Represents the gender of a user.
+ */
 enum class Gender {
     MALE,
     FEMALE,

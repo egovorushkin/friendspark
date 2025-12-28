@@ -6,8 +6,10 @@ import jakarta.validation.constraints.Size
  data class UpdateEventRequest(
     @field:Size(max = 100)
     val title: String? = null,
-    @field:Size(min = 5, max = 12)
-    val locationGeohash: String? = null,
+    @field:Size(max = 12)
+    val geohash: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val description: String? = null,
     val eventDate: String? = null, // ISO-8601
     val maxAttendees: Int? = null,

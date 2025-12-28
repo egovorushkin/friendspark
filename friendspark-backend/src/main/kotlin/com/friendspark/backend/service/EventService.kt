@@ -28,7 +28,9 @@ class EventService(private val eventRepository: EventRepository) {
     fun updateEvent(existing: Event, patch: UpdateEventRequest): Event {
         // TODO: add check that user exists and allowed to update event
         patch.title?.let { existing.title = it }
-        patch.locationGeohash?.let { existing.locationGeohash = it }
+        patch.geohash?.let { existing.geohash = it }
+        patch.latitude?.let { existing.latitude = it }
+        patch.longitude?.let { existing.longitude = it }
         patch.description?.let { existing.description = it }
         patch.eventDate?.let { existing.eventDate = Instant.parse(it) }
         patch.maxAttendees?.let { existing.maxAttendees = it }

@@ -1,4 +1,4 @@
-package com.friendspark.backend.dto
+package com.friendspark.backend.dto.user
 
 import java.time.LocalDate
 import java.util.UUID
@@ -11,4 +11,3 @@ class UserDetailsDTO(
     val interests: List<String>,
     val birthDate: LocalDate?
 )
-

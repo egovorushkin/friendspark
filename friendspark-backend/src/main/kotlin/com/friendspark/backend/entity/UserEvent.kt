@@ -1,45 +1,30 @@
 package com.friendspark.backend.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Id
-import jakarta.persistence.IdClass
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.ColumnDefault
 import java.time.Instant
-import java.util.UUID
 
 @Entity
-@Table(name = "user_events")
+@Table(schema = "friendspark", name = "user_events_rsvps")
 @IdClass(UserEventId::class)
-data class UserEvent(
+class UserEvent(
     @Id
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
     @Id
-    @ManyToOne
-    @JoinColumn(name = "event_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false)
     val event: Event,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var rsvpStatus: RsvpStatus = RsvpStatus.GOING,
+    var status: RsvpStatus = RsvpStatus.INTERESTED,
 
-    @Column(name = "joined_at", nullable = false)
-    val joinedAt: Instant = Instant.now()
+    @NotNull
+    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
+    @Column(name = "responded_at", nullable = false)
+    var respondedAt: Instant
 )
-
-enum class RsvpStatus {
-    GOING, MAYBE, NOT_GOING
-}
-
-// Composite key for UserEvent
-data class UserEventId(
-    val user: UUID = UUID.randomUUID(),
-    val event: UUID = UUID.randomUUID()
-) : java.io.Serializable

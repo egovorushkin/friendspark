@@ -1,7 +1,7 @@
 package com.friendspark.backend.controller
 
-import com.friendspark.backend.dto.event.CreateEventRequest
-import com.friendspark.backend.dto.event.EventResponse
+import com.friendspark.backend.dto.event.EventCreateDTO
+import com.friendspark.backend.dto.event.EventDetailsDTO
 import com.friendspark.backend.dto.event.UpdateEventRequest
 import com.friendspark.backend.entity.Event
 import com.friendspark.backend.service.EventService
@@ -21,36 +21,36 @@ class EventController(
     private val userService: UserService
 ) {
     @GetMapping
-    fun getAllEvents(): ResponseEntity<List<EventResponse>> =
-        ResponseEntity.ok(eventService.getAllEvents().map(EventResponse::fromEntity))
+    fun getAllEvents(): ResponseEntity<List<EventDetailsDTO>> =
+        ResponseEntity.ok(eventService.getAllEvents().map(EventDetailsDTO::fromEntity))
 
     @GetMapping("/{id}")
-    fun getEventById(@PathVariable id: UUID): ResponseEntity<EventResponse> =
+    fun getEventById(@PathVariable id: UUID): ResponseEntity<EventDetailsDTO> =
         eventService.getEventById(id)
-            ?.let { ResponseEntity.ok(EventResponse.fromEntity(it)) }
+            ?.let { ResponseEntity.ok(EventDetailsDTO.fromEntity(it)) }
             ?: ResponseEntity.status(HttpStatus.NOT_FOUND).build()
 
-    @PostMapping
-    fun createEvent(@Valid @RequestBody req: CreateEventRequest): ResponseEntity<EventResponse> {
-        val creator: com.friendspark.backend.entity.User = userService.getUserEntityById(req.creatorId)
-            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
-        val eventDate = try {
-            Instant.parse(req.eventDate)
-        } catch (_: Exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
-        }
-        val event = Event(
-            title = req.title,
-            locationGeohash = req.locationGeohash,
-            description = req.description,
-            eventDate = eventDate,
-            maxAttendees = req.maxAttendees,
-            isPublic = req.isPublic ?: true,
-            creator = creator
-        )
-        val saved = eventService.createEvent(event)
-        return ResponseEntity.status(HttpStatus.CREATED).body(EventResponse.fromEntity(saved))
-    }
+//    @PostMapping
+//    fun createEvent(@Valid @RequestBody req: EventCreateDTO): ResponseEntity<EventDetailsDTO> {
+//        val creator: com.friendspark.backend.entity.User = userService.getUserEntityById(req.creatorId)
+//            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+//        val eventDate = try {
+//            Instant.parse(req.eventDate)
+//        } catch (_: Exception) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+//        }
+//        val event = Event(
+//            title = req.title,
+//            locationGeohash = req.locationGeohash,
+//            description = req.description,
+//            eventDate = eventDate,
+//            maxAttendees = req.maxAttendees,
+//            isPublic = req.isPublic ?: true,
+//            creator = creator
+//        )
+//        val saved = eventService.createEvent(event)
+//        return ResponseEntity.status(HttpStatus.CREATED).body(EventDetailsDTO.fromEntity(saved))
+//    }
 
     @DeleteMapping("/{id}")
     fun deleteEvent(@PathVariable id: UUID): ResponseEntity<Unit> {
@@ -62,13 +62,13 @@ class EventController(
     fun patchEvent(
         @PathVariable id: UUID,
         @Valid @RequestBody patch: UpdateEventRequest
-    ): ResponseEntity<EventResponse> {
+    ): ResponseEntity<EventDetailsDTO> {
         val existing = eventService.getEventById(id) ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
         return try {
             val updated = eventService.updateEvent(existing, patch)
-            ResponseEntity.ok(EventResponse.fromEntity(updated))
+            ResponseEntity.ok(EventDetailsDTO.fromEntity(updated))
         } catch (_: OptimisticLockingFailureException) {
-            ResponseEntity.status(HttpStatus.CONFLICT).build<EventResponse>()
+            ResponseEntity.status(HttpStatus.CONFLICT).build<EventDetailsDTO>()
         }
     }
 }

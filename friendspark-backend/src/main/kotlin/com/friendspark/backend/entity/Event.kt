@@ -1,44 +1,46 @@
 package com.friendspark.backend.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Id
-import jakarta.persistence.Index
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.PreUpdate
-import jakarta.persistence.Table
-import jakarta.persistence.Version
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotNull
+import lombok.Getter
+import lombok.Setter
+import org.hibernate.annotations.ColumnDefault
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
+/**
+ * Represents an event created by a user.
+ */
 @Entity
+@Getter
+@Setter
 @Table(
-    name = "events",
-    indexes = [
-        Index(name = "idx_events_geohash", columnList = "location_geohash"),
-        Index(name = "idx_events_date", columnList = "event_date")
-    ]
+    schema = "friendspark",
+    name = "events"
 )
 data class Event(
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid")
-    val id: UUID? = null, // let JPA generate; do NOT pre-populate to avoid detached entity issues
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false)
+    var id: UUID? = null,
 
     @Column(nullable = false, length = 100)
     var title: String,
 
-    @Column(name = "location_geohash", nullable = false, length = 12)
-    var locationGeohash: String,
+    @Column(length = 12, nullable = false)
+    var geohash: String,
 
-    @Column(columnDefinition = "TEXT")
+    var latitude: Double,
+    var longitude: Double,
+
     var description: String? = null,
 
+    @NotNull
+    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
     @Column(name = "event_date", nullable = false)
     var eventDate: Instant,
+
+    var durationMinutes: Int = 120,
 
     @Column(name = "max_attendees")
     var maxAttendees: Int? = null,
@@ -50,18 +52,24 @@ data class Event(
     @JoinColumn(name = "creator_id", nullable = false)
     val creator: User,
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
+    // Moderation
+    @Column(name = "is_hidden")
+    var isHidden: Boolean = false,
 
-    @Column(name = "updated_at")
-    var updatedAt: Instant = Instant.now(),
+    var hiddenBy: UUID? = null,
 
-    @Version
-    @Column(name = "version", nullable = false)
-    var version: Long = 0L
-) {
-    @PreUpdate
-    fun onUpdate() {
-        updatedAt = Instant.now()
-    }
-}
+    var hiddenReason: String? = null,
+
+    @OneToMany(mappedBy = "event", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val rsvps: MutableSet<UserEvent> = mutableSetOf(),
+
+    @NotNull
+    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
+    @Column(name = "created_at", nullable = false)
+    var createdAt: Instant,
+
+    @NotNull
+    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
+    @Column(name = "updated_at", nullable = false)
+    var updatedAt: Instant,
+)
