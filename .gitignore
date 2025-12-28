@@ -72,8 +72,4 @@ DerivedData/
 *.sqlite
 
 # --- Misc ---
-# Ignore any local SQL experiments
-sql_scripts_exaples/**/*.log
-
-
 AGENTS.MD
