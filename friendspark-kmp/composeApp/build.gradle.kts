@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    id("com.google.gms.google-services")
 }
 
 kotlin {
@@ -16,7 +18,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -26,24 +28,45 @@ kotlin {
             isStatic = true
         }
     }
-    
+
+
     jvm()
-    
+
     js {
         browser()
         binaries.executable()
     }
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
         binaries.executable()
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.ktor.client.okhttp)
+            implementation("com.google.firebase:firebase-auth:22.3.0")
+            implementation("com.google.firebase:firebase-common:20.4.0")
+
+        }
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.kotlinx.coroutinesSwing)
+            // Firebase not supported on JVM, remove if not needed
+        }
+        iosMain.dependencies {
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.common)
+            implementation(libs.ktor.client.darwin)
+        }
+        jsMain.dependencies {
+            // Firebase not supported on JS, do not add
+        }
+        wasmJsMain.dependencies {
+            // Firebase not supported on WASM, do not add
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -56,15 +79,16 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.transitions)
+            implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.tab.navigator)
-
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-        }
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
         }
     }
 }
@@ -98,6 +122,8 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 compose.desktop {
@@ -111,3 +137,4 @@ compose.desktop {
         }
     }
 }
+

@@ -22,19 +22,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.friendspark.ui.screens.theme.BackgroundDark
 import com.friendspark.ui.screens.theme.CardDark
 import com.friendspark.ui.screens.theme.PrimaryBlue
 import com.friendspark.ui.screens.theme.TextLight
 import com.friendspark.ui.screens.theme.TextMuted
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import friendspark_kmp.composeapp.generated.resources.Res
 import friendspark_kmp.composeapp.generated.resources.onboarding_hero
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class OnboardingScreen : Screen {
+    @Preview
     @Composable
     override fun Content() {
         //        OnboardingComposable(
@@ -100,7 +102,7 @@ class OnboardingScreen : Screen {
                     }
                     Spacer(Modifier.height(12.dp))
                     Button(
-                        onClick = {},
+                        onClick = { navigator.push(LoginScreen()) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),

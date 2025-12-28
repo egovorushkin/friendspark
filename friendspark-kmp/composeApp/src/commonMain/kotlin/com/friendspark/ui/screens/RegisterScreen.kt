@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,12 @@ import friendspark_kmp.composeapp.generated.resources.ic_visibility
 import friendspark_kmp.composeapp.generated.resources.ic_visibility_off
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
+import com.friendspark.ui.AuthViewModel
+import com.friendspark.ui.AuthEvent
+
+
+data class Location(val latitude: Double, val longitude: Double)
 
 class RegisterScreen : Screen {
     @Preview
@@ -67,6 +74,11 @@ class RegisterScreen : Screen {
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         val passwordVisible = remember { mutableStateOf(false) }
+        val viewModel: AuthViewModel = koinInject()
+        val state = viewModel.state
+        var name by remember { mutableStateOf("") }
+        var interests by remember { mutableStateOf(listOf<String>()) }
+        var location by remember { mutableStateOf(Location(0.0, 0.0)) } // Replace with actual location logic
 
         Box(modifier = Modifier.fillMaxSize().background(BackgroundDark)) {
             Column(
@@ -140,11 +152,20 @@ class RegisterScreen : Screen {
                             }
                         }
                     )
-
+                    // Add name, interests, location inputs as needed
                     Spacer(Modifier.height(32.dp))
-
                     Button(
-                        onClick = { /* TODO: Handle register */ },
+                        onClick = {
+                            viewModel.onEvent(
+                                AuthEvent.Register(
+                                    email = email,
+                                    password = password,
+                                    name = name,
+                                    interests = interests,
+                                    location = location
+                                )
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -235,6 +256,13 @@ class RegisterScreen : Screen {
 //                onTabSelected = { /* Handle tab */ },
 //                modifier = Modifier.align(Alignment.BottomCenter)
 //            )
+        }
+
+        // After registration button
+        if (state.isSuccess) {
+            LaunchedEffect(state.isSuccess) {
+                navigator?.push(InterestsScreen)
+            }
         }
     }
 }
