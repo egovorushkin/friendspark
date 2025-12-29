@@ -71,7 +71,12 @@ DerivedData/
 *.db
 *.sqlite
 
+
+**/friendspark-kmp/composeApp/google-services.json
+**/friendspark-kmp/composeApp/GoogleService-Info.plist
+
 # --- Misc ---
+AGENTS.MD
 /AGENTS.MD
 /AGENTS.md
 **/AGENTS.MD
