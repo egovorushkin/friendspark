@@ -1,24 +1,22 @@
 package com.friendspark.backend.controller
 
 import com.friendspark.backend.dto.event.EventCreateDTO
+import com.friendspark.backend.dto.event.EventCreateResponseDTO
 import com.friendspark.backend.dto.event.EventDetailsDTO
 import com.friendspark.backend.dto.event.UpdateEventRequest
-import com.friendspark.backend.entity.Event
 import com.friendspark.backend.service.EventService
-import com.friendspark.backend.service.UserService
 import jakarta.validation.Valid
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
 import java.util.*
 
 @RestController
 @RequestMapping("/events")
 class EventController(
-    private val eventService: EventService,
-    private val userService: UserService
+    private val eventService: EventService
 ) {
     @GetMapping
     fun getAllEvents(): ResponseEntity<List<EventDetailsDTO>> =
@@ -30,27 +28,14 @@ class EventController(
             ?.let { ResponseEntity.ok(EventDetailsDTO.fromEntity(it)) }
             ?: ResponseEntity.status(HttpStatus.NOT_FOUND).build()
 
-//    @PostMapping
-//    fun createEvent(@Valid @RequestBody req: EventCreateDTO): ResponseEntity<EventDetailsDTO> {
-//        val creator: com.friendspark.backend.entity.User = userService.getUserEntityById(req.creatorId)
-//            ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
-//        val eventDate = try {
-//            Instant.parse(req.eventDate)
-//        } catch (_: Exception) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
-//        }
-//        val event = Event(
-//            title = req.title,
-//            locationGeohash = req.locationGeohash,
-//            description = req.description,
-//            eventDate = eventDate,
-//            maxAttendees = req.maxAttendees,
-//            isPublic = req.isPublic ?: true,
-//            creator = creator
-//        )
-//        val saved = eventService.createEvent(event)
-//        return ResponseEntity.status(HttpStatus.CREATED).body(EventDetailsDTO.fromEntity(saved))
-//    }
+    @PostMapping
+    fun createEvent(
+        @AuthenticationPrincipal uid: String,
+        @Valid @RequestBody eventCreate: EventCreateDTO
+    ): ResponseEntity<EventCreateResponseDTO> {
+        val createdEvent = eventService.createEvent(uid, eventCreate)
+        return ResponseEntity.status(HttpStatus.CREATED).body(EventCreateResponseDTO(createdEvent.id))
+    }
 
     @DeleteMapping("/{id}")
     fun deleteEvent(@PathVariable id: UUID): ResponseEntity<Unit> {

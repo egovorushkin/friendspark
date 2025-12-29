@@ -9,7 +9,7 @@ import java.time.Instant
 @RequiredArgsConstructor
 class DateTimeUtil(private val clock: Clock) {
 
-    fun now(): Instant? {
+    fun now(): Instant {
         return this.clock.instant()
     }
 }
