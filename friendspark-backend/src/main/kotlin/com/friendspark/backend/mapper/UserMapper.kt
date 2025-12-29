@@ -1,46 +1,51 @@
 package com.friendspark.backend.mapper
 
 import com.friendspark.backend.dto.user.UserCreateDto
+import com.friendspark.backend.dto.user.UserDetailsDTO
 import com.friendspark.backend.dto.user.UserUpdateDTO
 import com.friendspark.backend.entity.User
+import com.friendspark.backend.entity.UserRole
 import com.friendspark.backend.util.DateTimeUtil
-import org.mapstruct.BeanMapping
-import org.mapstruct.InjectionStrategy.CONSTRUCTOR
-import org.mapstruct.Mapper
-import org.mapstruct.Mapping
-import org.mapstruct.MappingConstants.ComponentModel.SPRING
-import org.mapstruct.MappingTarget
-import org.mapstruct.Named
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
-@Mapper(
-    componentModel = SPRING,
-    injectionStrategy = CONSTRUCTOR
-)
-abstract class UserMapper {
+@Component
+class UserMapper(private val dateTimeUtil: DateTimeUtil) {
+    fun toEntity(dto: UserCreateDto): User =
+        User(
+            firebaseUid = dto.firebaseUid,
+            email = dto.email,
+            firstName = dto.firstName,
+            lastName = dto.lastName,
+            lastActiveAt = dateTimeUtil.now(),
+            createdAt = dateTimeUtil.now(),
+            updatedAt = dateTimeUtil.now(),
+            role = UserRole.USER,
+        )
 
-    @Autowired
-    lateinit var dateTimeUtil: DateTimeUtil
+    fun update(user: User, dto: UserUpdateDTO): User = user.apply {
+        dto.firstName?.let { firstName = it }
+        dto.lastName?.let { lastName = it }
+        dto.photoUrl?.let { photoUrl = it }
+        dto.latitude?.let { latitude = it }
+        dto.longitude?.let { longitude = it }
+        dto.birthDate?.let { birthDate = it }
+        dto.bio?.let { bio = it }
+        dto.gender?.let { gender = it }
+        dto.interests?.let { interests = it }
+        lastActiveAt = dateTimeUtil.now()
+        updatedAt = dateTimeUtil.now()
+    }
 
-    @Named("toUser")
-    @Mapping(target = "role", expression = "java(com.friendspark.backend.entity.UserRole.USER)")
-    @Mapping(target = "lastActiveAt", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
-    abstract fun to(dto: UserCreateDto): User
-
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "lastActiveAt", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "updatedAt", expression = "java(dateTimeUtil.now())")
-    @Mapping(target = "firstName", source = "firstName")
-    @Mapping(target = "lastName", source = "lastName")
-    @Mapping(target = "photoUrl", source = "photoUrl")
-    @Mapping(target = "latitude", source = "latitude")
-    @Mapping(target = "longitude", source = "longitude")
-    @Mapping(target = "birthDate", source = "birthDate")
-    @Mapping(target = "bio", source = "bio")
-    @Mapping(target = "gender", source = "gender")
-    @Mapping(target = "interests", source = "interests")
-    abstract fun update(@MappingTarget user: User, dto: UserUpdateDTO): User
+    fun toDetailsDTO(user: User) = UserDetailsDTO(
+        email = user.email,
+        name = user.firstName + " " + user.lastName,
+        photoUrl = user.photoUrl,
+        latitude = user.latitude,
+        longitude = user.longitude,
+        birthDate = user.birthDate,
+        bio = user.bio,
+        gender = user.gender,
+        interests = user.interests?.map { it.name } ?: emptyList(),
+    )
 
 }

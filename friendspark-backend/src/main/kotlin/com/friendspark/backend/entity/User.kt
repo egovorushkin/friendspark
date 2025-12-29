@@ -27,10 +27,10 @@ class User(
     val email: String,
 
     @Column(name = "first_name", nullable = false, length = 100)
-    var firstName: String,
+    var firstName: String? = null,
 
     @Column(name = "last_name", nullable = false, length = 100)
-    var lastName: String,
+    var lastName: String? = null,
 
     @Column(name = "photo_url")
     var photoUrl: String? = null,
@@ -52,13 +52,13 @@ class User(
     var bannedBy: UUID? = null,
 
     @Column(name = "banned_at")
-    var bannedAt: Instant?,
+    var bannedAt: Instant? = null,
 
     @Column(length = 12)
-    var geohash: String?,
+    var geohash: String? = null,
 
-    var latitude: Double = 0.0,
-    var longitude: Double = 0.0,
+    var latitude: Double? = null,
+    var longitude: Double? = null,
 
     // Profile
     var birthDate: LocalDate? = null,
@@ -75,10 +75,10 @@ class User(
 
     // Relationships
     @OneToMany(mappedBy = "creator", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var createdEvents: MutableSet<Event>?,
+    var createdEvents: MutableSet<Event>? = null,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var rsvps: MutableSet<UserEvent>?,
+    var rsvps: MutableSet<UserEvent>? = null,
 
     @ManyToMany
     @JoinTable(
@@ -86,7 +86,7 @@ class User(
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "interest_id")]
     )
-    var interests: MutableSet<Interest>?,
+    var interests: MutableSet<Interest>? = null,
 
     @NotNull
     @ColumnDefault("(now) AT TIME ZONE 'utc'::text")

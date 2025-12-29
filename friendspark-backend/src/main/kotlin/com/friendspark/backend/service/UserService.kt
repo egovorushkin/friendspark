@@ -1,8 +1,8 @@
 package com.friendspark.backend.service
 
 import com.friendspark.backend.dto.RegisterRequestDTO
-import com.friendspark.backend.dto.user.UserDetailsDTO
 import com.friendspark.backend.dto.user.UserCreateDto
+import com.friendspark.backend.dto.user.UserDetailsDTO
 import com.friendspark.backend.dto.user.UserUpdateDTO
 import com.friendspark.backend.entity.User
 import com.friendspark.backend.mapper.UserMapper
@@ -18,8 +18,12 @@ class UserService(
     private val userRepository: UserRepository,
     private val firebaseService: FirebaseService,
 ) {
-    fun getAllUsers(): List<UserDetailsDTO> = userRepository.findAll().map { it.toDetailsDTO() }
-    fun getUserById(id: UUID): UserDetailsDTO? = userRepository.findById(id).orElse(null)?.toDetailsDTO()
+    fun getAllUsers(): List<UserDetailsDTO> = userRepository.findAll().map { userMapper.toDetailsDTO(it) }
+    fun getUserById(id: UUID): UserDetailsDTO? {
+        val orElse = userRepository.findById(id).orElse(null)
+        return orElse?.let { userMapper.toDetailsDTO(it) }
+    }
+
     fun getUserEntityById(id: UUID): User? = userRepository.findById(id).orElse(null)
 
     @Transactional
@@ -50,7 +54,7 @@ class UserService(
             firstName = firstName,
             lastName = lastName,
         )
-        val newUser = userMapper.to(userCreate)
+        val newUser = userMapper.toEntity(userCreate)
 
         val savedUser = userRepository.save(newUser)
 
@@ -66,23 +70,24 @@ class UserService(
     fun findByFirebaseUid(firebaseUid: String): User? = userRepository.findByFirebaseUid(firebaseUid)
 
     fun findNearbyUsers(geohashPrefix: String): List<UserDetailsDTO> =
-        userRepository.findAllByGeohashStartingWith(geohashPrefix).map { it.toDetailsDTO() }
+        userRepository.findAllByGeohashStartingWith(geohashPrefix).map { userMapper.toDetailsDTO(it) }
 
     fun updateUserProfile(userId: String, updateDTO: UserUpdateDTO): UserDetailsDTO {
         val user = userRepository.findByFirebaseUid(userId) ?: throw IllegalArgumentException("User not found")
         val userUpdate = userMapper.update(user, updateDTO)
-        userRepository.save(userUpdate)
-        return user.toDetailsDTO()
+        val updatedUser = userRepository.save(userUpdate)
+        return userMapper.toDetailsDTO(updatedUser);
     }
 }
 
 // TODO: Move to Mapper
 // Extension function to map User to UserDetailsDTO
-private fun User.toDetailsDTO() = UserDetailsDTO(
-    id = this.id,
-    email = this.email,
-    name = listOfNotNull(this.firstName, this.lastName).filter { it.isNotBlank() }.joinToString(" ").ifBlank { this.firstName },
-    photoUrl = this.photoUrl,
-    interests = this.interests?.map { it.toString() } ?: emptyList(),
-    birthDate = this.birthDate,
-)
+//private fun User.toDetailsDTO() = UserDetailsDTO(
+//    id = this.id,
+//    email = this.email,
+//    name = listOfNotNull(this.firstName, this.lastName).filter { it.isNotBlank() }.joinToString(" ")
+//        .ifBlank { this.firstName },
+//    photoUrl = this.photoUrl,
+//    interests = this.interests?.map { it.toString() } ?: emptyList(),
+//    birthDate = this.birthDate,
+//)
