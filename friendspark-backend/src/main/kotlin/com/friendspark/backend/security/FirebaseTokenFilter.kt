@@ -46,9 +46,12 @@ class FirebaseTokenFilter : OncePerRequestFilter() {
             // 3. The Token is valid. Extract User ID (UID) and create Spring Authentication object
             val uid = firebaseToken.uid
 
+            var authorities = mutableListOf<SimpleGrantedAuthority>()
             // Extract custom claims from firebaseToken.claims to map roles/authorities
-            val role = firebaseToken.claims["role"] as String
-            val authorities = listOf(SimpleGrantedAuthority("ROLE_$role"))
+            if (firebaseToken.claims != null && firebaseToken.claims.containsKey("role")) {
+                val role = firebaseToken.claims["role"] as String
+                authorities = listOf(SimpleGrantedAuthority("ROLE_$role")).toMutableList()
+            }
 
             // Create a custom authentication token. The UID is the principal.
             val authentication = UsernamePasswordAuthenticationToken(uid, idToken, authorities)
