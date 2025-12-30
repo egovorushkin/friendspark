@@ -7,6 +7,7 @@ import com.friendspark.backend.dto.event.UpdateEventRequest
 import com.friendspark.backend.service.AuthorizationService
 import com.friendspark.backend.service.EventService
 import jakarta.validation.Valid
+import mu.KotlinLogging
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,12 +22,20 @@ class EventController(
     private val eventService: EventService,
     private val authorizationService: AuthorizationService
 ) {
+    private val logger = KotlinLogging.logger {}
     @GetMapping
     fun getAllEvents(
         @AuthenticationPrincipal uid: String
     ): ResponseEntity<List<EventDetailsDTO>> {
-        val events = eventService.getAllEvents(uid)
-        return ResponseEntity.ok(events.map(EventDetailsDTO::fromEntity))
+        logger.info { "Getting all events for user: $uid" }
+        try {
+            val events = eventService.getAllEvents(uid)
+            logger.debug { "Retrieved ${events.size} events for user: $uid" }
+            return ResponseEntity.ok(events.map(EventDetailsDTO::fromEntity))
+        } catch (e: Exception) {
+            logger.error(e) { "Error retrieving events for user: $uid" }
+            throw e
+        }
     }
 
     @GetMapping("/{id}")
@@ -34,12 +43,20 @@ class EventController(
         @PathVariable id: UUID,
         @AuthenticationPrincipal uid: String
     ): ResponseEntity<EventDetailsDTO> {
-        val event = eventService.getEventById(id) ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        logger.info { "Getting event by id: $id for user: $uid" }
+        val event = eventService.getEventById(id)
+        
+        if (event == null) {
+            logger.warn { "Event not found: $id requested by user: $uid" }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
         
         return try {
             authorizationService.verifyCanViewEvent(uid, event)
+            logger.debug { "Event retrieved successfully: $id for user: $uid" }
             ResponseEntity.ok(EventDetailsDTO.fromEntity(event))
-        } catch (_: AccessDeniedException) {
+        } catch (e: AccessDeniedException) {
+            logger.warn { "Access denied for event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
@@ -49,8 +66,15 @@ class EventController(
         @AuthenticationPrincipal uid: String,
         @Valid @RequestBody eventCreate: EventCreateDTO
     ): ResponseEntity<EventCreateResponseDTO> {
-        val createdEvent = eventService.createEvent(uid, eventCreate)
-        return ResponseEntity.status(HttpStatus.CREATED).body(EventCreateResponseDTO(createdEvent.id))
+        logger.info { "Creating event '${eventCreate.title}' for user: $uid" }
+        try {
+            val createdEvent = eventService.createEvent(uid, eventCreate)
+            logger.info { "Event created successfully: ${createdEvent.id} by user: $uid" }
+            return ResponseEntity.status(HttpStatus.CREATED).body(EventCreateResponseDTO(createdEvent.id))
+        } catch (e: Exception) {
+            logger.error(e) { "Error creating event '${eventCreate.title}' for user: $uid" }
+            throw e
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -58,13 +82,21 @@ class EventController(
         @PathVariable id: UUID,
         @AuthenticationPrincipal uid: String
     ): ResponseEntity<Unit> {
-        val event = eventService.getEventById(id) ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        logger.info { "Deleting event: $id by user: $uid" }
+        val event = eventService.getEventById(id)
+        
+        if (event == null) {
+            logger.warn { "Event not found for deletion: $id requested by user: $uid" }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
         
         return try {
             authorizationService.verifyCanDeleteEvent(uid, event)
             eventService.deleteEvent(id)
+            logger.info { "Event deleted successfully: $id by user: $uid" }
             ResponseEntity.noContent().build()
-        } catch (_: AccessDeniedException) {
+        } catch (e: AccessDeniedException) {
+            logger.warn("Access denied for deleting event: {} by user: {}", id, uid)
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
@@ -75,15 +107,24 @@ class EventController(
         @AuthenticationPrincipal uid: String,
         @Valid @RequestBody patch: UpdateEventRequest
     ): ResponseEntity<EventDetailsDTO> {
-        val existing = eventService.getEventById(id) ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        logger.info { "Updating event: $id by user: $uid" }
+        val existing = eventService.getEventById(id)
+        
+        if (existing == null) {
+            logger.warn { "Event not found for update: $id requested by user: $uid" }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
         
         return try {
             authorizationService.verifyCanModifyEvent(uid, existing)
             val updated = eventService.updateEvent(existing, patch)
+            logger.info { "Event updated successfully: $id by user: $uid" }
             ResponseEntity.ok(EventDetailsDTO.fromEntity(updated))
-        } catch (_: AccessDeniedException) {
+        } catch (e: AccessDeniedException) {
+            logger.warn { "Access denied for updating event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (_: OptimisticLockingFailureException) {
+        } catch (e: OptimisticLockingFailureException) {
+            logger.warn { "Optimistic locking failure for event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.CONFLICT).build()
         }
     }

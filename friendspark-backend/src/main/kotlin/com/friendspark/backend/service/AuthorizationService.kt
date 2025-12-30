@@ -3,6 +3,7 @@ package com.friendspark.backend.service
 import com.friendspark.backend.entity.Event
 import com.friendspark.backend.entity.User
 import com.friendspark.backend.entity.UserRole
+import org.slf4j.LoggerFactory
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 class AuthorizationService(
     private val userService: UserService
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     /**
      * Checks if a user (identified by Firebase UID) is the creator of an event.
