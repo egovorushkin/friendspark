@@ -16,10 +16,26 @@ import java.util.*
 class EventService(
     private val eventRepository: EventRepository,
     private val userService: UserService,
-    private val eventMapper: EventMapper
+    private val eventMapper: EventMapper,
+    private val authorizationService: AuthorizationService
 ) {
-    fun getAllEvents(): List<Event> {
-        return eventRepository.findAll()
+    /**
+     * Gets all events visible to the current user.
+     * Hidden events are only visible to their creator, moderators, and admins.
+     */
+    fun getAllEvents(firebaseUid: String): List<Event> {
+        val allEvents = eventRepository.findAll()
+        val isModeratorOrAdmin = authorizationService.isModeratorOrAdmin(firebaseUid)
+        
+        return if (isModeratorOrAdmin) {
+            // Moderators and admins can see all events including hidden ones
+            allEvents
+        } else {
+            // Regular users can only see non-hidden events or events they created
+            allEvents.filter { event ->
+                !event.isHidden || event.creator.firebaseUid == firebaseUid
+            }
+        }
     }
 
     fun getEventById(id: UUID): Event? {
@@ -35,8 +51,13 @@ class EventService(
     }
 
     fun deleteEvent(id: UUID) = eventRepository.deleteById(id)
-    fun updateEvent(existing: Event, patch: UpdateEventRequest): Event {
-        // TODO: add check that user exists and allowed to update event
+    
+    /**
+     * Updates an event. Authorization check should be performed before calling this method.
+     * The authorizationService.verifyCanModifyEvent() should be called in the controller.
+     */
+    fun updateEvent(existing: Event, patch: UpdateEventRequest, firebaseUid: String): Event {
+        // Authorization is verified in the controller before calling this method
         patch.title?.let { existing.title = it }
         patch.geohash?.let { existing.geohash = it }
         patch.latitude?.let { existing.latitude = it }
