@@ -9,7 +9,6 @@ import com.friendspark.backend.exception.UserNotFoundException
 import com.friendspark.backend.mapper.EventMapper
 import com.friendspark.backend.repository.EventRepository
 import org.springframework.stereotype.Service
-import java.time.Instant
 import java.util.*
 
 @Service
@@ -26,7 +25,7 @@ class EventService(
     fun getAllEvents(firebaseUid: String): List<Event> {
         val allEvents = eventRepository.findAll()
         val isModeratorOrAdmin = authorizationService.isModeratorOrAdmin(firebaseUid)
-        
+
         return if (isModeratorOrAdmin) {
             // Moderators and admins can see all events including hidden ones
             allEvents
@@ -56,16 +55,9 @@ class EventService(
      * Updates an event. Authorization check should be performed before calling this method.
      * The authorizationService.verifyCanModifyEvent() should be called in the controller.
      */
-    fun updateEvent(existing: Event, patch: UpdateEventRequest, firebaseUid: String): Event {
+    fun updateEvent(existing: Event, patch: UpdateEventRequest): Event {
         // Authorization is verified in the controller before calling this method
-        patch.title?.let { existing.title = it }
-        patch.geohash?.let { existing.geohash = it }
-        patch.latitude?.let { existing.latitude = it }
-        patch.longitude?.let { existing.longitude = it }
-        patch.description?.let { existing.description = it }
-        patch.eventDate?.let { existing.eventDate = Instant.parse(it) }
-        patch.maxAttendees?.let { existing.maxAttendees = it }
-        patch.isPublic?.let { existing.isPublic = it }
-        return eventRepository.save(existing)
+        val updateEvent = eventMapper.update(existing, patch)
+        return eventRepository.save(updateEvent)
     }
 }
