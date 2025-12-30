@@ -39,7 +39,7 @@ class EventController(
         return try {
             authorizationService.verifyCanViewEvent(uid, event)
             ResponseEntity.ok(EventDetailsDTO.fromEntity(event))
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
@@ -64,7 +64,7 @@ class EventController(
             authorizationService.verifyCanDeleteEvent(uid, event)
             eventService.deleteEvent(id)
             ResponseEntity.noContent().build()
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
@@ -79,12 +79,12 @@ class EventController(
         
         return try {
             authorizationService.verifyCanModifyEvent(uid, existing)
-            val updated = eventService.updateEvent(existing, patch, uid)
+            val updated = eventService.updateEvent(existing, patch)
             ResponseEntity.ok(EventDetailsDTO.fromEntity(updated))
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         } catch (_: OptimisticLockingFailureException) {
-            ResponseEntity.status(HttpStatus.CONFLICT).build<EventDetailsDTO>()
+            ResponseEntity.status(HttpStatus.CONFLICT).build()
         }
     }
 }
