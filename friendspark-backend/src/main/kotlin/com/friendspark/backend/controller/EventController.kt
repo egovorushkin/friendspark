@@ -6,6 +6,7 @@ import com.friendspark.backend.dto.event.EventDetailsDTO
 import com.friendspark.backend.dto.event.UpdateEventRequest
 import com.friendspark.backend.service.AuthorizationService
 import com.friendspark.backend.service.EventService
+import com.friendspark.backend.service.UserService
 import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.springframework.dao.OptimisticLockingFailureException
@@ -20,7 +21,8 @@ import java.util.*
 @RequestMapping("/events")
 class EventController(
     private val eventService: EventService,
-    private val authorizationService: AuthorizationService
+    private val authorizationService: AuthorizationService,
+    private val userService: UserService
 ) {
     private val logger = KotlinLogging.logger {}
     @GetMapping
@@ -34,6 +36,37 @@ class EventController(
             return ResponseEntity.ok(events.map(EventDetailsDTO::fromEntity))
         } catch (e: Exception) {
             logger.error(e) { "Error retrieving events for user: $uid" }
+            throw e
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    fun getEventsByUserId(
+        @PathVariable userId: UUID,
+        @AuthenticationPrincipal uid: String
+    ): ResponseEntity<List<EventDetailsDTO>> {
+        logger.info { "Getting events for user id: $userId requested by: $uid" }
+        try {
+            // Authorization: Users can only see their own events unless they are moderators/admins
+            val targetUser = userService.getUserEntityById(userId)
+            if (targetUser == null) {
+                logger.warn { "User not found: $userId requested by: $uid" }
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+            }
+            
+            val isOwnEvents = targetUser.firebaseUid == uid
+            val isModeratorOrAdmin = authorizationService.isModeratorOrAdmin(uid)
+            
+            if (!isOwnEvents && !isModeratorOrAdmin) {
+                logger.warn { "Access denied: User $uid attempted to view events for user: $userId" }
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
+            
+            val events = eventService.getEventsByUserId(userId, uid)
+            logger.debug { "Retrieved ${events.size} events for user: $userId requested by: $uid" }
+            return ResponseEntity.ok(events.map(EventDetailsDTO::fromEntity))
+        } catch (e: Exception) {
+            logger.error(e) { "Error retrieving events for user: $userId requested by: $uid" }
             throw e
         }
     }
@@ -96,7 +129,7 @@ class EventController(
             logger.info { "Event deleted successfully: $id by user: $uid" }
             ResponseEntity.noContent().build()
         } catch (e: AccessDeniedException) {
-            logger.warn("Access denied for deleting event: {} by user: {}", id, uid)
+            logger.warn { "Access denied for deleting event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
