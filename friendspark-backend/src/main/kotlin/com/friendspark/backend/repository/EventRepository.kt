@@ -11,4 +11,7 @@ import java.util.UUID
 interface EventRepository : JpaRepository<Event, UUID> {
     @Query("SELECT e FROM Event e JOIN FETCH e.creator WHERE e.id = :id")
     override fun findById(id: UUID): Optional<Event>
+    
+    @Query("SELECT e FROM Event e JOIN FETCH e.creator WHERE e.creator.id = :userId ORDER BY e.eventDate ASC")
+    fun findAllByCreatorId(userId: UUID): List<Event>
 }
