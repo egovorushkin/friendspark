@@ -133,15 +133,3 @@ class UserService(
         return userMapper.toDetailsDTO(updatedUser)
     }
 }
-
-// TODO: Move to Mapper
-// Extension function to map User to UserDetailsDTO
-//private fun User.toDetailsDTO() = UserDetailsDTO(
-//    id = this.id,
-//    email = this.email,
-//    name = listOfNotNull(this.firstName, this.lastName).filter { it.isNotBlank() }.joinToString(" ")
-//        .ifBlank { this.firstName },
-//    photoUrl = this.photoUrl,
-//    interests = this.interests?.map { it.toString() } ?: emptyList(),
-//    birthDate = this.birthDate,
-//)

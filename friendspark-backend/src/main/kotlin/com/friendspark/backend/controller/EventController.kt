@@ -88,7 +88,7 @@ class EventController(
             authorizationService.verifyCanViewEvent(uid, event)
             logger.debug { "Event retrieved successfully: $id for user: $uid" }
             ResponseEntity.ok(EventDetailsDTO.fromEntity(event))
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             logger.warn { "Access denied for event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
@@ -128,7 +128,7 @@ class EventController(
             eventService.deleteEvent(id)
             logger.info { "Event deleted successfully: $id by user: $uid" }
             ResponseEntity.noContent().build()
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             logger.warn { "Access denied for deleting event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
@@ -153,10 +153,10 @@ class EventController(
             val updated = eventService.updateEvent(existing, patch)
             logger.info { "Event updated successfully: $id by user: $uid" }
             ResponseEntity.ok(EventDetailsDTO.fromEntity(updated))
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             logger.warn { "Access denied for updating event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (e: OptimisticLockingFailureException) {
+        } catch (_: OptimisticLockingFailureException) {
             logger.warn { "Optimistic locking failure for event: $id by user: $uid" }
             ResponseEntity.status(HttpStatus.CONFLICT).build()
         }

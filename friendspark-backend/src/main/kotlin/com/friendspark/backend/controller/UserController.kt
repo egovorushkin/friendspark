@@ -75,7 +75,7 @@ class UserController(
             val userDetails = userService.getUserById(id) ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
             logger.debug { "User details retrieved: $id by: $uid" }
             ResponseEntity.ok(userDetails)
-        } catch (e: AccessDeniedException) {
+        } catch (_: AccessDeniedException) {
             logger.warn { "Access denied: User $uid attempted to view user: $id" }
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
