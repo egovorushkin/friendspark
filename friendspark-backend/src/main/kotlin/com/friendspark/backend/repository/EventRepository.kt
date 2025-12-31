@@ -14,4 +14,7 @@ interface EventRepository : JpaRepository<Event, UUID> {
     
     @Query("SELECT e FROM Event e JOIN FETCH e.creator WHERE e.creator.id = :userId ORDER BY e.eventDate ASC")
     fun findAllByCreatorId(userId: UUID): List<Event>
+
+    @Query("SELECT e FROM Event e JOIN FETCH e.creator")
+    fun findAllWithCreator(): List<Event>
 }

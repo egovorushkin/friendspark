@@ -26,19 +26,19 @@ class EventService(
      */
     fun getAllEvents(firebaseUid: String): List<Event> {
         logger.debug { "Getting all events for user: $firebaseUid" }
-        val allEvents = eventRepository.findAll()
+        val allEvents = eventRepository.findAllWithCreator()
         val isModeratorOrAdmin = authorizationService.isModeratorOrAdmin(firebaseUid)
 
         val filteredEvents = if (isModeratorOrAdmin) {
             // Moderators and admins can see all events including hidden ones
-            logger.debug { "User $firebaseUid is moderator/admin, returning all ${allEvents.size} events" }
+            logger.debug { "User $firebaseUid is moderator/admin, returning all \\${allEvents.size} events" }
             allEvents
         } else {
             // Regular users can only see non-hidden events or events they created
             val visibleEvents = allEvents.filter { event ->
-                !event.isHidden || event.creator.firebaseUid == firebaseUid
+                !event.isHidden && event.creator.firebaseUid == firebaseUid
             }
-            logger.debug { "User $firebaseUid is regular user, returning ${visibleEvents.size} visible events out of ${allEvents.size}" }
+            logger.debug { "User $firebaseUid is regular user, returning \\${visibleEvents.size} visible events out of \\${allEvents.size}" }
             visibleEvents
         }
         return filteredEvents
