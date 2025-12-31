@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "2.2.21"
     kotlin("kapt") version "2.2.21"
+    jacoco
 }
 
 group = "com.friendspark"
@@ -73,4 +74,60 @@ allOpen {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+		csv.required.set(false)
+	}
+	
+	classDirectories.setFrom(
+		files(classDirectories.files.map {
+			fileTree(it) {
+				exclude(
+					"**/dto/**",
+					"**/entity/**",
+					"**/config/**",
+					"**/FriendsparkBackendApplication*",
+					"**/mapper/**",
+					"**/util/**"
+				)
+			}
+		})
+	)
+	
+	finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification {
+	dependsOn(tasks.jacocoTestReport)
+	violationRules {
+		rule {
+			limit {
+				minimum = "0.60".toBigDecimal() // 60% minimum coverage
+			}
+		}
+		
+		rule {
+			element = "CLASS"
+			excludes = listOf(
+				"*.dto.*",
+				"*.entity.*",
+				"*.config.*",
+				"*.FriendsparkBackendApplication*",
+				"*.mapper.*",
+				"*.util.*"
+			)
+			
+			limit {
+				counter = "LINE"
+				value = "COVEREDRATIO"
+				minimum = "0.60".toBigDecimal()
+			}
+		}
+	}
 }
