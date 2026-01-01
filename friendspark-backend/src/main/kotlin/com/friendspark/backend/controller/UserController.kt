@@ -1,13 +1,16 @@
 package com.friendspark.backend.controller
 
+import com.friendspark.backend.dto.user.PromoteToAdminRequest
 import com.friendspark.backend.dto.user.UserDetailsDTO
 import com.friendspark.backend.dto.user.UserUpdateDTO
 import com.friendspark.backend.service.AuthorizationService
 import com.friendspark.backend.service.UserService
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
@@ -109,6 +112,26 @@ class UserController(
             return updated
         } catch (e: Exception) {
             logger.error(e) { "Error updating profile for user: $uid" }
+            throw e
+        }
+    }
+
+    @PostMapping("/admin/promote")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun promoteToAdmin(
+        @AuthenticationPrincipal uid: String,
+        @Valid @RequestBody request: PromoteToAdminRequest
+    ): ResponseEntity<UserDetailsDTO> {
+        logger.info { "Admin promotion request for user: ${request.userId} by: $uid" }
+        try {
+            val promotedUser = userService.promoteToAdmin(request.userId, uid)
+            logger.info { "User ${request.userId} successfully promoted to admin by: $uid" }
+            return ResponseEntity.ok(promotedUser)
+        } catch (e: IllegalArgumentException) {
+            logger.warn { "Failed to promote user ${request.userId} to admin: ${e.message}" }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        } catch (e: Exception) {
+            logger.error(e) { "Error promoting user ${request.userId} to admin by: $uid" }
             throw e
         }
     }

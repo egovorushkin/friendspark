@@ -5,6 +5,7 @@ import com.friendspark.backend.dto.user.UserCreateDto
 import com.friendspark.backend.dto.user.UserDetailsDTO
 import com.friendspark.backend.dto.user.UserUpdateDTO
 import com.friendspark.backend.entity.User
+import com.friendspark.backend.entity.UserRole
 import com.friendspark.backend.mapper.UserMapper
 import com.friendspark.backend.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -130,6 +131,36 @@ class UserService(
         val userUpdate = userMapper.update(user, updateDTO)
         val updatedUser = userRepository.save(userUpdate)
         log.info("Profile updated successfully for user: {} (id: {})", userId, updatedUser.id)
+        return userMapper.toDetailsDTO(updatedUser)
+    }
+
+    @Transactional
+    fun promoteToAdmin(userId: UUID, promotedByFirebaseUid: String): UserDetailsDTO {
+        log.info("Promoting user {} to admin by: {}", userId, promotedByFirebaseUid)
+        val user = userRepository.findById(userId).orElse(null) ?: run {
+            log.error("User not found for promotion: {} by: {}", userId, promotedByFirebaseUid)
+            throw IllegalArgumentException("User not found")
+        }
+
+        if (user.role == UserRole.ADMIN) {
+            log.warn("User {} is already an admin, requested by: {}", userId, promotedByFirebaseUid)
+            return userMapper.toDetailsDTO(user)
+        }
+
+        val previousRole = user.role
+        user.role = UserRole.ADMIN
+        val updatedUser = userRepository.save(user)
+        log.info("User {} promoted from {} to ADMIN by: {}", userId, previousRole, promotedByFirebaseUid)
+
+        // Update Firebase custom claims
+        try {
+            firebaseService.addCustomClaims(updatedUser.firebaseUid, mapOf("role" to updatedUser.role.name))
+            log.debug("Firebase custom claims updated for user: {} (role: ADMIN)", updatedUser.firebaseUid)
+        } catch (e: Exception) {
+            log.error("Failed to update Firebase custom claims for user: {}", updatedUser.firebaseUid, e)
+            // Continue even if Firebase update fails - role is already updated in database
+        }
+
         return userMapper.toDetailsDTO(updatedUser)
     }
 }
