@@ -1,5 +1,6 @@
 package com.friendspark.backend.controller
 
+import com.friendspark.backend.dto.user.PagedResponse
 import com.friendspark.backend.dto.user.PromoteToAdminRequest
 import com.friendspark.backend.dto.user.UserDetailsDTO
 import com.friendspark.backend.dto.user.UserUpdateDTO
@@ -7,6 +8,8 @@ import com.friendspark.backend.service.AuthorizationService
 import com.friendspark.backend.service.UserService
 import jakarta.validation.Valid
 import mu.KotlinLogging
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
@@ -26,12 +29,22 @@ class UserController(
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     fun getAllUsers(
-        @AuthenticationPrincipal uid: String
-    ): ResponseEntity<List<UserDetailsDTO>> {
-        logger.info { "Getting all users requested by: $uid" }
-        val users = userService.getAllUsers()
-        logger.debug { "Retrieved ${users.size} users for admin/moderator: $uid" }
-        return ResponseEntity.ok(users)
+        @AuthenticationPrincipal uid: String,
+        @PageableDefault(size = 20, sort = ["createdAt"]) pageable: Pageable
+    ): ResponseEntity<PagedResponse<UserDetailsDTO>> {
+        logger.info { "Getting all users requested by: $uid (page: ${pageable.pageNumber}, size: ${pageable.pageSize})" }
+        val userPage = userService.getAllUsers(pageable)
+        val pagedResponse = PagedResponse(
+            content = userPage.content,
+            page = userPage.number,
+            size = userPage.size,
+            totalElements = userPage.totalElements,
+            totalPages = userPage.totalPages,
+            first = userPage.isFirst,
+            last = userPage.isLast
+        )
+        logger.debug { "Retrieved page ${userPage.number + 1} of ${userPage.totalPages} (${userPage.content.size} users) for admin/moderator: $uid" }
+        return ResponseEntity.ok(pagedResponse)
     }
 
     @GetMapping("/me")
