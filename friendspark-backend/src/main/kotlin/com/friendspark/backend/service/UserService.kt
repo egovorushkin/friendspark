@@ -21,6 +21,7 @@ class UserService(
     private val userMapper: UserMapper,
     private val userRepository: UserRepository,
     private val firebaseService: FirebaseService,
+    private val interestService: InterestService,
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -131,8 +132,17 @@ class UserService(
             logger.error { "User not found for Firebase UID: $userId" }
             throw IllegalArgumentException("User not found")
         }
-        val userUpdate = userMapper.update(user, updateDTO)
-        val updatedUser = userRepository.save(userUpdate)
+
+        // Map simple scalar fields
+        userMapper.update(user, updateDTO)
+
+        // Resolve and set interests (if provided)
+        updateDTO.interestIds?.let { ids ->
+            val interests = interestService.resolveByIds(ids)
+            user.interests = interests.toMutableSet()
+        }
+
+        val updatedUser = userRepository.save(user)
         logger.info { "Profile updated successfully for user: $userId (id: ${updatedUser.id})" }
         return userMapper.toDetailsDTO(updatedUser)
     }

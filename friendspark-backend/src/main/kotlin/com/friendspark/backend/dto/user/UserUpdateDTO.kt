@@ -1,8 +1,8 @@
 package com.friendspark.backend.dto.user
 
 import com.friendspark.backend.entity.Gender
-import com.friendspark.backend.entity.Interest
 import java.time.LocalDate
+import java.util.UUID
 
 data class UserUpdateDTO(
     val firstName: String?,
@@ -13,5 +13,9 @@ data class UserUpdateDTO(
     val birthDate: LocalDate?,
     val bio: String?,
     val gender: Gender?,
-    val interests: MutableSet<Interest>?
+    /**
+     * Interest IDs to set for the user. If null, interests are not modified.
+     * If empty set, user interests will be cleared.
+     */
+    val interestIds: Set<UUID>?,
 )
