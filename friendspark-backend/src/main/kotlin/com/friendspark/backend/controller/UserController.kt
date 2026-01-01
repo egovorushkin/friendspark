@@ -24,22 +24,18 @@ class UserController(
     private val logger = KotlinLogging.logger {}
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAllUsers(
         @AuthenticationPrincipal uid: String
     ): ResponseEntity<List<UserDetailsDTO>> {
         logger.info { "Getting all users requested by: $uid" }
-        // Only moderators and admins can see all users
-        // Regular users should use the /nearby endpoint or search
-        if (!authorizationService.isModeratorOrAdmin(uid)) {
-            logger.warn { "Access denied: User $uid attempted to get all users without proper permissions" }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
         val users = userService.getAllUsers()
         logger.debug { "Retrieved ${users.size} users for admin/moderator: $uid" }
         return ResponseEntity.ok(users)
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     fun me(@AuthenticationPrincipal uid: String): ResponseEntity<Map<String, Any?>> {
         logger.debug { "Getting current user profile for: $uid" }
         try {
@@ -61,6 +57,7 @@ class UserController(
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     fun getUserDetails(
         @PathVariable id: UUID,
         @AuthenticationPrincipal uid: String
@@ -85,6 +82,7 @@ class UserController(
     }
 
     @GetMapping("/nearby")
+    @PreAuthorize("hasRole('USER')")
     fun findNearbyUsers(
         @RequestParam geohashPrefix: String,
         @AuthenticationPrincipal uid: String
@@ -101,6 +99,7 @@ class UserController(
     }
 
     @PutMapping("/me")
+    @PreAuthorize("hasRole('USER')")
     fun updateProfile(
         @AuthenticationPrincipal uid: String,
         @RequestBody updateDTO: UserUpdateDTO

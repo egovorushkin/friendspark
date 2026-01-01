@@ -13,6 +13,7 @@ import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -26,6 +27,7 @@ class EventController(
 ) {
     private val logger = KotlinLogging.logger {}
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAllEvents(
         @AuthenticationPrincipal uid: String
     ): ResponseEntity<List<EventDetailsDTO>> {
@@ -41,6 +43,7 @@ class EventController(
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     fun getEventsByUserId(
         @PathVariable userId: UUID,
         @AuthenticationPrincipal uid: String
@@ -72,6 +75,7 @@ class EventController(
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     fun getEventById(
         @PathVariable id: UUID,
         @AuthenticationPrincipal uid: String
@@ -95,6 +99,7 @@ class EventController(
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     fun createEvent(
         @AuthenticationPrincipal uid: String,
         @Valid @RequestBody eventCreate: EventCreateDTO
@@ -111,6 +116,7 @@ class EventController(
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun deleteEvent(
         @PathVariable id: UUID,
         @AuthenticationPrincipal uid: String
@@ -135,6 +141,7 @@ class EventController(
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun patchEvent(
         @PathVariable id: UUID,
         @AuthenticationPrincipal uid: String,
