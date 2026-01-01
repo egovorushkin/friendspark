@@ -31,7 +31,6 @@ class UserMapper(private val dateTimeUtil: DateTimeUtil) {
         dto.birthDate?.let { birthDate = it }
         dto.bio?.let { bio = it }
         dto.gender?.let { gender = it }
-        dto.interests?.let { interests = it }
         lastActiveAt = dateTimeUtil.now()
         updatedAt = dateTimeUtil.now()
     }
