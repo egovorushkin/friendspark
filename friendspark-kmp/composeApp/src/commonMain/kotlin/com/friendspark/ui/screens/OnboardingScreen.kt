@@ -39,10 +39,6 @@ class OnboardingScreen : Screen {
     @Preview
     @Composable
     override fun Content() {
-        //        OnboardingComposable(
-//            onRegisterClick = { println("Register clicked");},
-//            onLoginClick = { println("Login clicked"); }
-//        )
         val navigator = LocalNavigator.currentOrThrow
         Box(
             modifier = Modifier
@@ -66,7 +62,7 @@ class OnboardingScreen : Screen {
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(Modifier.height(300.dp)) // push content below image
+                Spacer(Modifier.height(350.dp)) // push content below image
 
                 // Title & subtitle
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -80,7 +76,7 @@ class OnboardingScreen : Screen {
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Discover new friends and exciting events nearby,\nall while keeping your exact location private.",
+                        text = "Discover new friends and exciting events nearby, all while keeping your exact location private.",
                         color = TextLight,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -111,6 +107,29 @@ class OnboardingScreen : Screen {
                     ) {
                         Text("Log In", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
+
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = { navigator.push(CompleteProfileScreen()) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CardDark),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("CompleteProfileScreen", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = { navigator.push(SelectAgeScreen()) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CardDark),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("SelectAge", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
 
                 // Footer
@@ -125,91 +144,4 @@ class OnboardingScreen : Screen {
         }
     }
 
-
 }
-
-//@Composable
-//fun OnboardingScreen(
-//    onRegisterClick: () -> Unit,
-//    onLoginClick: () -> Unit
-//) {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(BackgroundDark)
-//    ) {
-//        // Hero image (top half)
-//        Image(
-//            painter = painterResource(Res.drawable.onboarding_hero),
-//            contentDescription = null,
-//            contentScale = ContentScale.Crop,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(380.dp)
-//        )
-//
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(horizontal = 24.dp),
-//            verticalArrangement = Arrangement.SpaceBetween,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Spacer(Modifier.height(300.dp)) // push content below image
-//
-//            // Title & subtitle
-//            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                Text(
-//                    text = "Welcome to\nFriendSpark",
-//                    color = TextLight,
-//                    fontSize = 32.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    textAlign = TextAlign.Center,
-//                    lineHeight = 38.sp
-//                )
-//                Spacer(Modifier.height(16.dp))
-//                Text(
-//                    text = "Discover new friends and exciting events nearby,\nall while keeping your exact location private.",
-//                    color = TextLight,
-//                    fontSize = 16.sp,
-//                    textAlign = TextAlign.Center,
-//                    lineHeight = 24.sp
-//                )
-//            }
-//
-//            // Buttons
-//            Column {
-//                Button(
-//                    onClick = onRegisterClick,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(56.dp),
-//                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-//                    shape = RoundedCornerShape(12.dp)
-//                ) {
-//                    Text("Register", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-//                }
-//                Spacer(Modifier.height(12.dp))
-//                Button(
-//                    onClick = onLoginClick,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(56.dp),
-//                    colors = ButtonDefaults.buttonColors(containerColor = CardDark),
-//                    shape = RoundedCornerShape(12.dp)
-//                ) {
-//                    Text("Log In", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-//                }
-//            }
-//
-//            // Footer
-//            Text(
-//                text = "By continuing, you agree to our Terms of Service and Privacy Policy.",
-//                color = TextMuted,
-//                fontSize = 12.sp,
-//                textAlign = TextAlign.Center,
-//                modifier = Modifier.padding(vertical = 24.dp)
-//            )
-//        }
-//    }
-//}

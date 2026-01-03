@@ -46,6 +46,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.friendspark.ui.AuthEvent
 import com.friendspark.ui.AuthViewModel
+import com.friendspark.ui.screens.theme.BackgroundDark
+import com.friendspark.util.AppLogger
 import friendspark_kmp.composeapp.generated.resources.Res
 import friendspark_kmp.composeapp.generated.resources.ic_apple
 import friendspark_kmp.composeapp.generated.resources.ic_back
@@ -53,11 +55,9 @@ import friendspark_kmp.composeapp.generated.resources.ic_google
 import friendspark_kmp.composeapp.generated.resources.ic_visibility
 import friendspark_kmp.composeapp.generated.resources.ic_visibility_off
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 
 class LoginScreen : Screen {
-    @Preview
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -70,7 +70,7 @@ class LoginScreen : Screen {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0D1B2A))
+                .background(BackgroundDark)
         ) {
             // Back Button
             IconButton(
@@ -117,18 +117,31 @@ class LoginScreen : Screen {
                 // Email Field
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        // Clear email error when user starts typing
+                        if (state.emailError != null) {
+                            viewModel.clearEmailError()
+                        }
+                    },
                     label = { Text("Email", color = Color(0xFFB0BEC5)) },
                     singleLine = true,
+                    isError = state.emailError != null,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color(0xFF778DA9),
-                        unfocusedBorderColor = Color(0xFF415A77),
+                        focusedBorderColor = if (state.emailError != null) Color(0xFFEF5350) else Color(
+                            0xFF778DA9
+                        ),
+                        unfocusedBorderColor = if (state.emailError != null) Color(0xFFEF5350) else Color(
+                            0xFF415A77
+                        ),
                         focusedLabelColor = Color(0xFF778DA9),
                         cursorColor = Color(0xFF00D4FF),
                         focusedContainerColor = Color(0xFF1B263B),
-                        unfocusedContainerColor = Color(0xFF1B263B)
+                        unfocusedContainerColor = Color(0xFF1B263B),
+                        errorTextColor = Color(0xFFEF5350),
+                        errorCursorColor = Color(0xFFEF5350)
                     ),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
@@ -136,15 +149,33 @@ class LoginScreen : Screen {
                         .height(64.dp)
                 )
 
+                // Email error message
+                if (state.emailError != null) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = state.emailError,
+                        color = Color(0xFFEF5350),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+
                 Spacer(Modifier.height(20.dp))
 
                 // Password Field
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        // Clear password error when user starts typing
+                        if (state.passwordError != null) {
+                            viewModel.clearPasswordError()
+                        }
+                    },
                     label = { Text("Password", color = Color(0xFFB0BEC5)) },
                     singleLine = true,
                     visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    isError = state.passwordError != null,
                     trailingIcon = {
                         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                             Icon(
@@ -157,18 +188,35 @@ class LoginScreen : Screen {
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color(0xFF778DA9),
-                        unfocusedBorderColor = Color(0xFF415A77),
+                        focusedBorderColor = if (state.passwordError != null) Color(0xFFEF5350) else Color(
+                            0xFF778DA9
+                        ),
+                        unfocusedBorderColor = if (state.passwordError != null) Color(0xFFEF5350) else Color(
+                            0xFF415A77
+                        ),
                         focusedLabelColor = Color(0xFF778DA9),
                         cursorColor = Color(0xFF00D4FF),
                         focusedContainerColor = Color(0xFF1B263B),
-                        unfocusedContainerColor = Color(0xFF1B263B)
+                        unfocusedContainerColor = Color(0xFF1B263B),
+                        errorTextColor = Color(0xFFEF5350),
+                        errorCursorColor = Color(0xFFEF5350)
                     ),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp)
                 )
+
+                // Password error message
+                if (state.passwordError != null) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = state.passwordError,
+                        color = Color(0xFFEF5350),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
 
                 // Forgot Password
                 Text(
@@ -186,6 +234,7 @@ class LoginScreen : Screen {
                 // Log In Button
                 Button(
                     onClick = {
+                        AppLogger.logUI("Login button clicked")
                         viewModel.onEvent(AuthEvent.Login(email, password))
                     },
                     modifier = Modifier
@@ -299,7 +348,16 @@ class LoginScreen : Screen {
 
         if (state.isSuccess) {
             LaunchedEffect(state.isSuccess) {
-                navigator.push(InterestsScreen)
+                AppLogger.logNavigation("Login successful, navigating to HomeScreen")
+                // Navigate to HomeScreen after successful login
+                navigator.push(FriendDetailsScreen())
+            }
+        }
+
+        // Log errors
+        if (state.error != null) {
+            LaunchedEffect(state.error) {
+                AppLogger.logAuthError("Login error displayed to user: ${state.error}")
             }
         }
     }

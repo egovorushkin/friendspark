@@ -46,11 +46,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.friendspark.ui.screens.theme.BackgroundDark
-import com.friendspark.ui.screens.theme.PrimaryBlue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import com.friendspark.ui.AuthEvent
+import com.friendspark.ui.AuthViewModel
+import com.friendspark.ui.screens.theme.BackgroundDark
 import com.friendspark.ui.screens.theme.PlaceholderLabel
+import com.friendspark.ui.screens.theme.PrimaryBlue
+import com.friendspark.util.AppLogger
 import friendspark_kmp.composeapp.generated.resources.Res
 import friendspark_kmp.composeapp.generated.resources.ic_apple
 import friendspark_kmp.composeapp.generated.resources.ic_back
@@ -60,8 +63,6 @@ import friendspark_kmp.composeapp.generated.resources.ic_visibility_off
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-import com.friendspark.ui.AuthViewModel
-import com.friendspark.ui.AuthEvent
 
 
 data class Location(val latitude: Double, val longitude: Double)
@@ -76,9 +77,6 @@ class RegisterScreen : Screen {
         val passwordVisible = remember { mutableStateOf(false) }
         val viewModel: AuthViewModel = koinInject()
         val state = viewModel.state
-        var name by remember { mutableStateOf("") }
-        var interests by remember { mutableStateOf(listOf<String>()) }
-        var location by remember { mutableStateOf(Location(0.0, 0.0)) } // Replace with actual location logic
 
         Box(modifier = Modifier.fillMaxSize().background(BackgroundDark)) {
             Column(
@@ -126,20 +124,46 @@ class RegisterScreen : Screen {
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     FloatingLabelInput(
                         value = email,
-                        onValueChange = { email = it },
+                        onValueChange = {
+                            email = it
+                            // Clear email error when user starts typing
+                            if (state.emailError != null) {
+                                viewModel.clearEmailError()
+                            }
+                        },
                         label = "Email",
                         placeholder = "Email",
-                        keyboardType = KeyboardType.Email
+                        keyboardType = KeyboardType.Email,
+                        errorMessage = state.emailError
                     )
+
+                    // Email error message
+                    if (state.emailError != null) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = state.emailError,
+                            color = Color(0xFFEF5350),
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+
                     Spacer(Modifier.height(24.dp))
                     FloatingLabelInput(
                         value = password,
-                        onValueChange = { password = it },
+                        onValueChange = {
+                            password = it
+                            // Clear password error when user starts typing
+                            if (state.passwordError != null) {
+                                viewModel.clearPasswordError()
+                            }
+                        },
                         label = "Password",
                         placeholder = "Password",
                         keyboardType = KeyboardType.Password,
                         visualTransformation = if (passwordVisible.value)
                             VisualTransformation.None else PasswordVisualTransformation(),
+                        errorMessage = state.passwordError,
                         trailingIcon = {
                             IconButton(onClick = {
                                 passwordVisible.value = !passwordVisible.value
@@ -152,17 +176,26 @@ class RegisterScreen : Screen {
                             }
                         }
                     )
+
+                    // Password error message
+                    if (state.passwordError != null) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = state.passwordError,
+                            color = Color(0xFFEF5350),
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
                     // Add name, interests, location inputs as needed
                     Spacer(Modifier.height(32.dp))
                     Button(
                         onClick = {
+                            AppLogger.logUI("Register button clicked")
                             viewModel.onEvent(
                                 AuthEvent.Register(
                                     email = email,
                                     password = password,
-                                    name = name,
-                                    interests = interests,
-                                    location = location
                                 )
                             )
                         },
@@ -250,18 +283,20 @@ class RegisterScreen : Screen {
                 Spacer(Modifier.weight(1f))
             }
 
-            // Bottom Navigation
-//            BottomNavigationBar(
-//                selectedTab = BottomTab.HOME,
-//                onTabSelected = { /* Handle tab */ },
-//                modifier = Modifier.align(Alignment.BottomCenter)
-//            )
         }
 
-        // After registration button
+        // After successful registration, navigate to SelectAgeScreen
         if (state.isSuccess) {
             LaunchedEffect(state.isSuccess) {
-                navigator?.push(InterestsScreen)
+                AppLogger.logNavigation("Registration successful, navigating to SelectAgeScreen")
+                navigator?.push(SelectAgeScreen())
+            }
+        }
+
+        // Log errors
+        if (state.error != null) {
+            LaunchedEffect(state.error) {
+                AppLogger.logAuthError("Registration error displayed to user: ${state.error}")
             }
         }
     }
@@ -275,11 +310,18 @@ fun FloatingLabelInput(
     placeholder: String,
     keyboardType: KeyboardType,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    errorMessage: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         val isFocused = remember { mutableStateOf(false) }
         val showLabel = value.isNotEmpty() || isFocused.value
+        val hasError = errorMessage != null
+        val borderColor = when {
+            hasError -> Color(0xFFEF5350) // Red for error
+            isFocused.value -> PrimaryBlue
+            else -> Color(0xFF37474F)
+        }
 
         TextField(
             value = value,
@@ -290,7 +332,7 @@ fun FloatingLabelInput(
                 .clip(RoundedCornerShape(12.dp))
                 .border(
                     2.dp,
-                    if (isFocused.value) PrimaryBlue else Color(0xFF37474F),
+                    borderColor,
                     RoundedCornerShape(12.dp)
                 )
                 .background(Color.Transparent),
@@ -307,12 +349,15 @@ fun FloatingLabelInput(
                 unfocusedIndicatorColor = Color.Transparent,
                 cursorColor = PrimaryBlue,
                 focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White
+                unfocusedTextColor = Color.White,
+                errorTextColor = Color(0xFFEF5350),
+                errorCursorColor = Color(0xFFEF5350)
             ),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = visualTransformation,
             singleLine = true,
             trailingIcon = trailingIcon,
+            isError = hasError,
 //            onFocusChanged = { isFocused.value = it.isFocused },
 
         )

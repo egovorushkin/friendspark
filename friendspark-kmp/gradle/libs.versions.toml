@@ -21,6 +21,7 @@ koin = "4.1.1"
 firebase = "2.4.0"
 ktor = "3.3.3"
 coil = "3.0.0-alpha06"
+napier = "2.7.1"
 
 [libraries]
 google-firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
@@ -51,11 +52,14 @@ firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "fireb
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 # coil (For image loading)
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt:coil-network-ktor", version.ref = "coil" }
+# napier (Logging)
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 
 
@@ -66,3 +70,4 @@ composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "com
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
